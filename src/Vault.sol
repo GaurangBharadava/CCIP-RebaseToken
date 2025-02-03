@@ -31,18 +31,15 @@ contract Vault {
     function redeem(uint256 _amount) external {
         //1. burn the token from the user.
         i_rebaseToken.burn(msg.sender, _amount);
-        //2. send the user ETH.        
+        //2. send the user ETH.
         (bool success,) = payable(msg.sender).call{value: _amount}("");
-        if(!success) {
+        if (!success) {
             revert Vault__redeemFailed();
         }
         emit Redeemed(msg.sender, _amount);
-    }   
-
-    function getRebaseTokenAddress() external view returns(address) {
-        return address(i_rebaseToken);
     }
 
-
-
+    function getRebaseTokenAddress() external view returns (address) {
+        return address(i_rebaseToken);
+    }
 }

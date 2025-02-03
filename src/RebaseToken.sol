@@ -21,9 +21,8 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
 
     event InterestRateChanged(uint256 indexed newInterestRate);
-    constructor() ERC20("Rebase Token", "RBT") Ownable(msg.sender) {    
 
-    }
+    constructor() ERC20("Rebase Token", "RBT") Ownable(msg.sender) {}
 
     function grantMintAndBurnRole(address _account) external onlyOwner {
         _grantRole(MINT_AND_BURN_ROLE, _account);
@@ -36,14 +35,14 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      */
     function setInterestRate(uint256 _newInterestRate) external onlyOwner {
         //set the interest rate.
-        if(_newInterestRate >= s_interestRate) {
+        if (_newInterestRate >= s_interestRate) {
             revert RebaseToken__InterestRateCanOnlyDecrease(_newInterestRate, s_interestRate);
         }
         s_interestRate = _newInterestRate;
         emit InterestRateChanged(_newInterestRate);
     }
 
-    function principleBalanceOf(address _user) external view returns(uint256) {
+    function principleBalanceOf(address _user) external view returns (uint256) {
         return super.balanceOf(_user);
     }
 
@@ -59,7 +58,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _amount the amount of tokens to burn.
      */
     function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
-        if(_amount == type(uint256).max) {
+        if (_amount == type(uint256).max) {
             _amount = balanceOf(_from);
         }
         _mintAccruedInterest(_from);
@@ -69,33 +68,33 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     /**
      * @notice calculate the balance of the user including the interest.
      */
-    function balanceOf(address _user) public view override returns(uint256) {
+    function balanceOf(address _user) public view override returns (uint256) {
         //get the current principal balance of the user.(the numbers of thoken that have actually been minted to the user)
         //Multiply the principal balance by the interest rate.
         return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR;
     }
 
-    function transfer(address _recipient, uint256 _amount) public override returns(bool) {
+    function transfer(address _recipient, uint256 _amount) public override returns (bool) {
         _mintAccruedInterest(msg.sender);
         _mintAccruedInterest(_recipient);
-        if(_amount == type(uint256).max) {
+        if (_amount == type(uint256).max) {
             _amount = balanceOf(msg.sender);
         }
 
-        if(balanceOf(_recipient) == 0) {
+        if (balanceOf(_recipient) == 0) {
             s_userInterestRate[_recipient] = s_userInterestRate[msg.sender];
         }
         return super.transfer(_recipient, _amount);
     }
 
-    function transferFrom(address _sender, address _recipient, uint256 _amount) public override returns(bool) {
+    function transferFrom(address _sender, address _recipient, uint256 _amount) public override returns (bool) {
         _mintAccruedInterest(_sender);
         _mintAccruedInterest(_recipient);
-        if(_amount == type(uint256).max) {
+        if (_amount == type(uint256).max) {
             _amount = balanceOf(_sender);
         }
 
-        if(balanceOf(_recipient) == 0) {
+        if (balanceOf(_recipient) == 0) {
             s_userInterestRate[_recipient] = s_userInterestRate[_sender];
         }
         return super.transferFrom(_sender, _recipient, _amount);
@@ -104,7 +103,11 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     /**
      * @notice Calculate the interest that has accumulated since the last update.
      */
-    function _calculateUserAccumulatedInterestSinceLastUpdate(address _user) internal view returns(uint256 linearInterest) {
+    function _calculateUserAccumulatedInterestSinceLastUpdate(address _user)
+        internal
+        view
+        returns (uint256 linearInterest)
+    {
         //we need to calculate the interest that has accumulated since the last update.
         //this is going to be linier growth with time.
         //1. calculate time since last update.
@@ -134,11 +137,11 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
         _mint(_user, balanceIncreased);
     }
 
-    function getUserInterestRate(address _user) external view returns(uint256) {
+    function getUserInterestRate(address _user) external view returns (uint256) {
         return s_userInterestRate[_user];
     }
 
-    function getInterestRate() external view returns(uint256) {
+    function getInterestRate() external view returns (uint256) {
         return s_interestRate;
     }
 }
