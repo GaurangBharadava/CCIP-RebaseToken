@@ -14,7 +14,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 contract RebaseToken is ERC20, Ownable, AccessControl {
     error RebaseToken__InterestRateCanOnlyDecrease(uint256 newInterestRate, uint256 oldInterestRate);
 
-    uint256 private s_interestRate = 5e10; // 5e10 / 1e18 = 5e-8 = 0.00000005 => 0.00000005 * 100 = 0.000005% => 0.000005% Imterest rate.
+    uint256 private s_interestRate = (5 * PRECISION_FACTOR) / 1e8; //5e10; // 5e10 / 1e18 = 5e-8 = 0.00000005 => 0.00000005 * 100 = 0.000005% => 0.000005% Imterest rate.
     uint256 private constant PRECISION_FACTOR = 1e18;
     bytes32 private constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE");
     mapping(address => uint256) private s_userInterestRate;
@@ -46,9 +46,10 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
         return super.balanceOf(_user);
     }
 
-    function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
+    function mint(address _to, uint256 _amount, uint256 _userInterestRate) external onlyRole(MINT_AND_BURN_ROLE) {
         _mintAccruedInterest(_to);
-        s_userInterestRate[_to] = s_interestRate;
+        // s_userInterestRate[_to] = s_interestRate; // v1
+        s_userInterestRate[_to] = _userInterestRate;
         _mint(_to, _amount);
     }
 

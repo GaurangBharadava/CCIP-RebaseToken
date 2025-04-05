@@ -24,11 +24,16 @@ contract Vault {
 
     function deposit() external payable {
         // 1. we need to use the amount of ETH the user has sent to mint the token to the user.
-        i_rebaseToken.mint(msg.sender, msg.value);
+        // call get interest rate function to get interestRate.
+        uint256 interestRate = i_rebaseToken.getInterestrate();
+        i_rebaseToken.mint(msg.sender, msg.value, interestRate);
         emit Deposited(msg.sender, msg.value);
     }
 
     function redeem(uint256 _amount) external {
+        if (_amount == type(uint256).max) {
+            _amount = i_rebaseToken.balanceOf(msg.sender);
+        }
         //1. burn the token from the user.
         i_rebaseToken.burn(msg.sender, _amount);
         //2. send the user ETH.
