@@ -11,7 +11,7 @@ contract Vault {
 
     error Vault__redeemFailed();
 
-    IRebaseToken private immutable i_rebaseToken;
+    IRebaseToken public immutable i_rebaseToken;
 
     event Deposited(address indexed user, uint256 amount);
     event Redeemed(address indexed user, uint256 amount);
@@ -25,7 +25,7 @@ contract Vault {
     function deposit() external payable {
         // 1. we need to use the amount of ETH the user has sent to mint the token to the user.
         // call get interest rate function to get interestRate.
-        uint256 interestRate = i_rebaseToken.getInterestrate();
+        uint256 interestRate = i_rebaseToken.getInterestRate();
         i_rebaseToken.mint(msg.sender, msg.value, interestRate);
         emit Deposited(msg.sender, msg.value);
     }

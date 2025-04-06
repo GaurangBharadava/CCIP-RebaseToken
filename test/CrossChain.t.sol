@@ -153,7 +153,7 @@ contract CrossChain is Test {
             data: "",
             tokenAmounts: evmTokenAmount,
             feeToken: localNetworkDetail.linkAddress,
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 100_000}))
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 500_000}))
         });
         uint256 fees =
             IRouterClient(localNetworkDetail.routerAddress).getFee(remoteNetworkDetail.chainSelector, message);
